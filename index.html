@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Post System</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+    <div id="titleBox">
+        Facebook
+    </div>
+
+    <h2>Create a Post</h2>
+    <input type="text" id="postInput" placeholder="share your thoughts for the day ...">
+    <button onclick="addPost()">Post</button>
+
+    <div id="postsContainer"></div>
+
+    <script>
+        let posts = [];
+
+        function addPost() {
+            let postText = document.getElementById("postInput").value;
+            if (postText.trim() === "") return;
+
+            let post = {
+                id: posts.length,
+                text: postText,
+                likes: 0,
+                comments: []
+            };
+
+            posts.push(post);
+            document.getElementById("postInput").value = "";
+            renderPosts();
+        }
+
+        function likePost(postId) {
+            posts[postId].likes++;
+            renderPosts();
+        }
+
+        function addComment(postId) {
+            let commentText = document.getElementById(`commentInput-${postId}`).value;
+            if (commentText.trim() === "") return;
+
+            let comment = {
+                text: commentText,
+                replies: []
+            };
+
+            posts[postId].comments.push(comment);
+            document.getElementById(`commentInput-${postId}`).value = "";
+            renderPosts();
+        }
+
+        function addReply(postId, commentIndex) {
+            let replyText = document.getElementById(`replyInput-${postId}-${commentIndex}`).value;
+            if (replyText.trim() === "") return;
+
+            posts[postId].comments[commentIndex].replies.push(replyText);
+            document.getElementById(`replyInput-${postId}-${commentIndex}`).value = "";
+            renderPosts();
+        }
+
+        function renderPosts() {
+            let postContainer = document.getElementById("postsContainer");
+            postContainer.innerHTML = "";
+
+            posts.forEach((post, postId) => {
+                let postDiv = document.createElement("div");
+                postDiv.classList.add("post");
+
+                postDiv.innerHTML = `
+                    <p><strong>Post No. ${postId + 1}</strong>: ${post.text}</p>
+                    <button class="like-btn" onclick="likePost(${postId})">Like (${post.likes})</button>
+                    <div class="comment-box">
+                        <input type="text" id="commentInput-${postId}" placeholder="Add a comment">
+                        <button onclick="addComment(${postId})">Comment</button>
+                    </div>
+                    <div id="comments-${postId}">
+                        ${post.comments.map((comment, commentIndex) => `
+                            <div class="reply-box">
+                                <p>${comment.text}</p>
+                                <input type="text" id="replyInput-${postId}-${commentIndex}" placeholder="Reply">
+                                <button onclick="addReply(${postId}, ${commentIndex})">Reply</button>
+                                <div class="reply-box">
+                                    ${comment.replies.map(reply => `<p>↳ ${reply}</p>`).join("")}
+                                </div>
+                            </div>
+                        `).join("")}
+                    </div>`;
+
+                postContainer.appendChild(postDiv);
+            });
+        }
+    </script>
+
+</body>
+</html>
